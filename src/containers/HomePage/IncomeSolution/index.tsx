@@ -7,8 +7,28 @@ const IncomeSolution = () => {
     window.open("https://miketoken-io.gitbook.io/miketoken.io/");
   };
 
-  const callTestAPI = () => {
-    // window.open("https://miketoken-io.gitbook.io/miketoken.io/");
+  const callTestAPI = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/vaishapitest/getNFTData', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          address: "0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB",
+          tokenId: "3931"
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      console.log('API Response:', data);
+    } catch (error) {
+      console.error('Error calling test API:', error);
+    }
   };
 
   const router = useRouter();

