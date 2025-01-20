@@ -2,37 +2,30 @@ const asyncErrorHandler = require("../middlewares/helpers/asyncErrorHandler");
 const sendToken = require("../utils/sendToken");
 
 const { NftMetadata } = require("../models/NFTMetadataModel");
-const Web3 = require("web3");
+const { Web3 } = require("web3");
+// Import Moralis
 const Moralis = require("moralis").default;
+// Import the EvmChain dataType
 const { EvmChain } = require("@moralisweb3/common-evm-utils");
 
 
-// // Web3 instance connected to Infura (Sepolia testnet)
-// const web3 = new Web3(
-//   new Web3.providers.HttpProvider(process.env.INFURA_SEPI_URL)
-// );
+// // Web3 instance connected to Infura (Sepolia testnet) 
+// const web3 = new Web3.providers.HttpProvider(process.env.INFURA_SEPI_URL)
 // const account = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY);
 // web3.eth.accounts.wallet.add(account);
 // web3.eth.defaultAccount;
 
-// Initialize Web3 instance with the HttpProvider
-const provider = new Web3.providers.HttpProvider(process.env.INFURA_SEPI_URL);
+const provider = new Web3.providers.HttpProvider('https://sepolia.infura.io/v3/fd581decbce1466882eb8604654c7e4f')
 const web3 = new Web3(provider);
-
-// Add an account using the private key
-const account = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY);
+const account = web3.eth.accounts.privateKeyToAccount('0x3bc88885a8f211b26a3bf0602a99d7a4db903501a7b8e5789d5dd80d77e4d244');
 web3.eth.accounts.wallet.add(account);
-
-// Set the default account
-web3.eth.defaultAccount = account.address;
-
-console.log("Web3 instance initialized successfully.");
-console.log("Default account set to:", web3.eth.defaultAccount);
+web3.eth.defaultAccount;
 
 const startMoralis = async () => {
   try {
     await Moralis.start({
-      apiKey: process.env.MORALIS_API_KEY,
+        apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6IjU5MzdiMzY3LTUxZmItNDlkYS1iYjY0LWRiZWY5NjdlNWE4ZSIsIm9yZ0lkIjoiNDExMzc0IiwidXNlcklkIjoiNDIyNzUxIiwidHlwZUlkIjoiYWY1YTQ3ZmItNDczOS00ODZiLTg2MWQtM2MzOWY4YmViZjA4IiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3Mjg2Njc0NTYsImV4cCI6NDg4NDQyNzQ1Nn0.Gc2_wTDh-peAufFNsTrb4WScIk3qc6zbWRqZA_-xmJg'
+    //   apiKey: process.env.MORALIS_API_KEY,
       // Other configuration if needed
     });
     console.log("Moralis started successfully!");
