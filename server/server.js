@@ -1,8 +1,8 @@
 const app = require("./app");
 const connectDatabase = require("./config/database");
 const cloudinary = require("cloudinary");
-// const PORT = parseInt(Math.random() * 4000 + 1000);
-const PORT = 5000;
+const PORT = parseInt(Math.random() * 4000 + 1000);
+// const PORT = 5000;
 
 // UncaughtException Error
 process.on("uncaughtException", (err) => {
