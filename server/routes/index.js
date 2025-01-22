@@ -7,10 +7,11 @@ const paymentRoute = require("./paymentRoute");
 const productRoute = require("./productRoute");
 const vaishRoute = require("./vaishRoute");
 
-router.route("/user", userRoute);
-router.route("/order", orderRoute);
-router.route("/payment", paymentRoute);
-router.route("/product", productRoute);
-router.route("/vaishapitest", vaishRoute);
+// Mount individual routers for each route group
+router.use("/user", userRoute);
+router.use("/order", orderRoute);
+router.use("/payment", paymentRoute);
+router.use("/product", productRoute);
+router.use("/vaishapitest", vaishRoute);
 
 module.exports = router;

@@ -9,7 +9,7 @@ const IncomeSolution = () => {
 
   const callTestAPI = async () => {
     try {
-      const response = await fetch('/vaishapitest/getNFTData', {
+      const response = await fetch('http://localhost:4020/vaishapitest/getNFTData', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -105,10 +105,14 @@ exports.getNFTMetaData = asyncErrorHandler(async (req, res) => {
   };
 
   // Save to MongoDB
-  const nftMetadata = new NftMetadata(nftData);
-  await nftMetadata.save();
+  // const nftMetadata = new NftMetadata(nftData);
+  // await nftMetadata.save();
 
   // Generate and send token with the metadata
-  const user = { id: nftMetadata.ownerOf }; // Assuming 'ownerOf' is treated as the user ID
-  sendToken(user, 200, res); // Use the sendToken utility for sending the response with a token
+  const user = { id: nftData.ownerOf }; // Assuming 'ownerOf' is treated as the user ID
+  // sendToken(user, 200, res); // Use the sendToken utility for sending the response with a token
+  res.status(200).json({
+    success: true,
+    nftData: nftData
+});
 });
