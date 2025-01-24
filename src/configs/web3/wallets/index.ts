@@ -11,6 +11,8 @@ import { SafePal } from "./icons/SafePal";
 import { TokenPocket } from "./icons/TokenPocket";
 import { TrustWallet } from "./icons/TrustWallet";
 import { WalletConnect } from "./icons/WalletConnect";
+import { LedgerIcon } from "./icons/LedgerWallet";
+
 
 export enum ConnectorNames {
   MetaMask = "metaMask",
@@ -20,6 +22,7 @@ export enum ConnectorNames {
   WalletLink = "coinbaseWallet",
   TrustWalletInject = "trustWallet",
   BitKeepWallet = "bitkeepWallet",
+  Ledger = "ledger"
 }
 
 export interface WalletsConfig {
@@ -184,4 +187,16 @@ export const ListWallets: WalletsConfig[] = [
     installed: true,
     priority: 5,
   },
+  {
+    title: "Ledger",
+    icon: LedgerIcon,
+    installed: true,
+    connectorId: ConnectorNames.Ledger,
+    priority: 4,
+    downloadLink: {
+      mobile: "https://www.ledger.com/pages/ledger-live",
+      desktop: "https://www.ledger.com/pages/ledger-live",
+    },
+  },
+  
 ];
