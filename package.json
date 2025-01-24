@@ -17,6 +17,8 @@
     "@emotion/styled": "^11.11.0",
     "@ethersproject/address": "^5.7.0",
     "@ethersproject/bytes": "^5.7.0",
+    "@ledgerhq/hw-app-eth": "^6.42.3",
+    "@ledgerhq/hw-transport-webusb": "^6.29.4",
     "@pancakeswap/multicall": "^0.0.2",
     "@pancakeswap/sdk": "3.1.4",
     "@pancakeswap/smart-router": "0.6.1",

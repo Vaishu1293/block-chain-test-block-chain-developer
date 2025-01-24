@@ -18,7 +18,8 @@ import { useState } from "react";
 import { isMobile } from "react-device-detect";
 import { useSwitchNetwork } from "wagmi";
 import WalletItem from "./WalletItem";
-
+import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
+import Eth from "@ledgerhq/hw-app-eth";
 
 
 interface IWalletModal {
@@ -37,6 +38,34 @@ const WalletModal: React.FC<IWalletModal> = ({
 
   const handleConnectWallet = async (wallet: WalletsConfig): Promise<void> => {
     try {
+      if (wallet.connectorId === "ledger") {
+        // Ledger-specific connection logic
+        try {
+          const transport = await TransportWebUSB.create(); // Create a WebUSB transport
+          const eth = new Eth(transport); // Initialize Ethereum app interface
+  
+          // Fetch the Ethereum address using a standard derivation path
+          const { address } = await eth.getAddress("44'/60'/0'/0/0");
+          console.log("Connected Ledger address:", address);
+  
+          // Store the wallet information in localStorage or manage state as needed
+          localStorage.setItem("wallet", "ledger");
+          localStorage.setItem("ledgerAddress", address);
+  
+          // Close the modal
+          onDismiss();
+        } catch (error: any) {
+          // console.error("Ledger connection error:", error);
+          if (error.name === "TransportOpenUserCancelled") {
+            alert("No USB device selected. Please connect your Ledger and select it.");
+          } else {
+            alert(`Error connecting to Ledger: ${error.message}`);
+          }
+          console.error("Ledger connection error:", error);
+        }
+        return;
+      }
+
       if (!wallet?.installed) {
         window.open(
           isMobile
